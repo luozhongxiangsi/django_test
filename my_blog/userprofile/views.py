@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from .forms import UserLoginForm
 from .forms import UserRegisterForm
+from django.contrib.auth import logout
 # Create ybur views here.
 
 
@@ -46,3 +47,6 @@ def user_register(request):
         return HttpResponse("请使用GET或POST请教数据")
         
     
+def user_logout(request):
+    logout(request)
+    return redirect("article:article_list")
