@@ -39,7 +39,7 @@ def article_create(request):
         artticle_post_form = ArticlePostForm(data=request.POST)
         if artticle_post_form.is_valid():
             new_article = artticle_post_form.save(commit=False)
-            new_article.author = User.objects.get(id=1)
+            new_article.author = User.objects.get(id=request.user.id)
             new_article.save()
             return redirect("article:article_list")
         else:
