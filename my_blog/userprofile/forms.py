@@ -25,7 +25,9 @@ class UserRegisterForm(forms.ModelForm):
             raise forms.ValidationError('密码输入不一致，请重试')
 
 
+# Profile的表单类
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
+        # 定义表单包含的字段
         fields = ('phone', 'avatar', 'bio')
