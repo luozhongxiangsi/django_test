@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 # 导入 HttpResponse 模块
-from .models import ArticlePost
+from .models import ArticlePost, ArticleColumn
 # 引入 markdown
 import markdown
 from .forms import ArticlePostForm
@@ -63,11 +63,14 @@ def article_detail(request, id):
 # 写文章的视图
 def article_create(request):
     if request.method == 'POST':
-        artticle_post_form = ArticlePostForm(data=request.POST)
+        artticle_post_form = ArticlePostForm(request.POST, request.FILES)
         if artticle_post_form.is_valid():
             new_article = artticle_post_form.save(commit=False)
             new_article.author = User.objects.get(id=request.user.id)
+            if request.POST['column'] != 'none':
+                new_article.column = ArticleColumn.objects.get(id=request.POST['column'])
             new_article.save()
+            artticle_post_form.save_m2m()
             return redirect("article:article_list")
         else:
             return HttpResponse("表单内容有误，请重新填写。")
@@ -104,6 +107,10 @@ def article_update(request, id):
             # 保存新写入的 title、body 数据并保存
             article.title = request.POST['title']
             article.body = request.POST['body']
+            if request.POST['column'] != 'none':
+                article.column = ArticleColumn.objects.get(id=request.POST['column'])
+            else:
+                article.column = None
             article.save()
             # 完成后返回到修改后的文章中。需传入文章的 id 值
             return redirect("article:article_detail", id=id)
@@ -118,5 +125,11 @@ def article_update(request, id):
         # 赋值上下文，将 article 文章对象也传递进去，以便提取旧的内容
         context = {'article': article, 'article_post_form': article_post_form}
         # 将响应返回到模板中
+        columns = ArticleColumn.objects.all()
+        context = {
+            'article': article,
+            'article_post_form': article_post_form,
+            'columns': columns,
+        }
         return render(request, 'article/update.html', context)
 
